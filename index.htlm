@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MangaCloud | Global Creative Repository</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        :root {
+            --brand-primary: #6366f1;
+            --brand-secondary: #a855f7;
+            --surface-dark: #05070a;
+            --accent-green: #10b981;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--surface-dark);
+            color: #f1f5f9;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        .serif { font-family: 'Playfair Display', serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--brand-primary); }
+
+        .glass-nav {
+            background: rgba(5, 7, 10, 0.85);
+            backdrop-filter: blur(24px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .traffic-marquee {
+            white-space: nowrap;
+            animation: marquee 40s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .manga-card {
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .manga-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: var(--brand-primary);
+            box-shadow: 0 25px 50px -12px rgba(99, 102, 241, 0.25);
+        }
+
+        /* Image Filters */
+        .filter-raw img { filter: none; }
+        .filter-sepia img { filter: sepia(0.6) contrast(1.1) brightness(0.9); }
+        .filter-monochrome img { filter: grayscale(1) contrast(1.2); }
+        .filter-vibrant img { filter: saturate(1.5) contrast(1.1); }
+        .filter-noir img { filter: grayscale(1) contrast(1.8) brightness(0.7); }
+
+        /* Aura Backgrounds */
+        .aura-none { background: var(--surface-dark); }
+        .aura-indigo { background: radial-gradient(circle at 50% 10%, #1e1b4b 0%, #05070a 100%); }
+        .aura-crimson { background: radial-gradient(circle at 50% 10%, #450a0a 0%, #05070a 100%); }
+        .aura-emerald { background: radial-gradient(circle at 50% 10%, #064e3b 0%, #05070a 100%); }
+
+        .btn-brand {
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <!-- Persistent Navigation -->
+    <nav class="fixed top-0 w-full z-[100] glass-nav">
+        <div class="max-w-[1600px] mx-auto px-6 h-20 flex justify-between items-center">
+            <div class="flex items-center gap-12">
+                <div class="cursor-pointer group" onclick="goHome()">
+                    <span class="text-[10px] font-black tracking-[0.4em] text-indigo-500 uppercase block mb-0.5">MangaCloud v4.0</span>
+                    <div class="text-2xl font-black tracking-tighter flex items-center uppercase">
+                        GLOBAL<span class="text-indigo-500 italic">REPOSITORY</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-8">
+                <button onclick="goNews()" class="text-[10px] font-black uppercase tracking-widest hover:text-indigo-400 transition cursor-pointer">Broadcasts</button>
+                <button id="adminNavBtn" onclick="toggleAuthOverlay()" class="border border-white/20 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:border-indigo-500 hover:text-indigo-400 transition-all cursor-pointer">
+                    Admin Terminal
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Traffic Marquee -->
+    <div class="fixed top-20 w-full z-40 bg-indigo-600 h-8 flex items-center overflow-hidden border-y border-indigo-400/20 shadow-lg shadow-indigo-500/10">
+        <div class="traffic-marquee flex gap-12 items-center text-[10px] font-bold uppercase text-white tracking-widest">
+            <span>• Node: Tokyo-Prime 14ms</span> <span>• Traffic: 42.1k Req/Sec</span> <span>• Trending: "Void Walker" Ch. 4</span> <span>• Status: All Systems Operational</span>
+            <span>• Node: London-Edge 22ms</span> <span>• Active Readers: 112,402</span> <span>• Storage: 94% Capacity</span> <span>• Secure Handshake Verified</span>
+            <span>• Node: Tokyo-Prime 14ms</span> <span>• Traffic: 42.1k Req/Sec</span> <span>• Trending: "Void Walker" Ch. 4</span> <span>• Status: All Systems Operational</span>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main id="view-port" class="pt-28 min-h-screen">
+        <div class="flex items-center justify-center min-h-[50vh]">
+            <span class="text-[10px] font-black uppercase tracking-[0.5em] text-slate-700 animate-pulse">Initializing Interface...</span>
+        </div>
+    </main>
+</div>
+
+<!-- Login Overlay -->
+<div id="auth-overlay" class="fixed inset-0 z-[1001] hidden flex items-center justify-center bg-[#020305]/95 backdrop-blur-2xl p-6">
+    <div class="max-w-md w-full p-10 bg-white/5 border border-white/10 rounded-[40px] text-center shadow-2xl relative">
+        <div class="w-16 h-16 bg-indigo-500/10 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-indigo-500/20">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-indigo-500"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
+        </div>
+        <h2 class="text-2xl font-black uppercase italic mb-2">Restricted Access</h2>
+        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-8">Enter Master Passkey</p>
+        <input type="password" id="passkey-field" onkeypress="if(event.key === 'Enter') handleLogin()" class="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-center text-xl font-bold tracking-[0.4em] focus:border-indigo-500 outline-none mb-6" placeholder="••••••••">
+        <button onclick="handleLogin()" class="w-full bg-indigo-600 py-5 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-indigo-500 transition-all">Authenticate</button>
+        <button onclick="closeAuthOverlay()" class="mt-6 text-[10px] font-bold text-slate-600 uppercase hover:text-white transition">Cancel</button>
+    </div>
+</div>
+
+<script type="module">
+/* --- Firebase optional (mock fallback) --- */
+let firebaseAvailable = false;
+let firestore = null;
+let auth = null;
+
+try {
+    const firebaseConfig = typeof window.__firebase_config !== 'undefined' ? window.__firebase_config : null;
+    if (firebaseConfig) {
+        const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js");
+        const { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, updateDoc, query, orderBy } = await import("https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js");
+        const { getAuth, signInAnonymously, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js");
+        const app = initializeApp(firebaseConfig);
+        firestore = getFirestore(app);
+        auth = getAuth(app);
+        firebaseAvailable = true;
+
+        signInAnonymously(auth).catch(console.error);
+    }
+} catch (e) {
+    console.warn("Firebase not configured; running in mock mode.", e);
+}
+
+/* --- State --- */
+let state = {
+    chapters: [],
+    news: [],
+    isAdmin: false,
+    currentView: 'home',
+    editingId: null,
+    viewingId: null
+};
+
+const persistKey = 'mangaCloudMock';
+
+/* --- Mock persistence if Firebase is unavailable --- */
+const loadMock = () => {
+    const raw = localStorage.getItem(persistKey);
+    if (raw) {
+        try {
+            const parsed = JSON.parse(raw);
+            state.chapters = parsed.chapters || [];
+            state.news = parsed.news || [];
+        } catch {}
+    } else {
+        // Seed demo content
+        state.chapters = [
+            { id: 'demo-1', number: 1, title: 'Void Walker', cover: 'https://picsum.photos/400/600?1', pages: ['https://picsum.photos/1200/1800?1','https://picsum.photos/1200/1800?2'], filter: 'filter-raw', aura: 'aura-indigo' },
+            { id: 'demo-2', number: 2, title: 'Crimson Bloom', cover: 'https://picsum.photos/400/600?3', pages: ['https://picsum.photos/1200/1800?3','https://picsum.photos/1200/1800?4'], filter: 'filter-sepia', aura: 'aura-crimson' },
+        ];
+        state.news = [
+            { id: 'n1', title: 'System Online', content: 'All nodes synchronized. Enjoy your reading!', timestamp: Date.now() }
+        ];
+    }
+};
+
+const saveMock = () => {
+    localStorage.setItem(persistKey, JSON.stringify({ chapters: state.chapters, news: state.news }));
+};
+
+/* --- UI Helpers --- */
+window.updateLabel = (inputId, labelId) => {
+    const el = document.getElementById(inputId);
+    const lbl = document.getElementById(labelId);
+    if (el && lbl) {
+        lbl.innerText = el.files.length ? `${el.files.length} Asset(s) Readied` : lbl.dataset.default || lbl.innerText;
+        lbl.classList.toggle('text-indigo-400', !!el.files.length);
+    }
+};
+
+/* --- Navigation --- */
+window.goHome = () => { state.currentView = 'home'; state.editingId = null; state.viewingId = null; render(); };
+window.goNews = () => { state.currentView = 'news'; state.editingId = null; state.viewingId = null; render(); };
+window.goAdmin = () => { 
+    if (!state.isAdmin) return toggleAuthOverlay();
+    state.currentView = 'admin'; 
+    state.viewingId = null;
+    render(); 
+};
+
+/* --- Auth --- */
+window.handleLogin = () => {
+    const pass = document.getElementById('passkey-field').value;
+    if (pass === "admin 2024") {
+        state.isAdmin = true;
+        localStorage.setItem('mCloudAdmin', 'true');
+        document.getElementById('adminNavBtn').innerText = "ROOT TERMINAL";
+        document.getElementById('adminNavBtn').classList.add('text-indigo-400', 'border-indigo-500/50');
+        closeAuthOverlay();
+        goAdmin();
+    } else {
+        alert("ACCESS DENIED");
+    }
+};
+
+window.toggleAuthOverlay = () => {
+    if (state.isAdmin) return goAdmin();
+    document.getElementById('auth-overlay').classList.remove('hidden');
+    document.getElementById('passkey-field').focus();
+};
+
+window.closeAuthOverlay = () => {
+    document.getElementById('auth-overlay').classList.add('hidden');
+    document.getElementById('passkey-field').value = '';
+};
+
+window.logout = () => {
+    state.isAdmin = false;
+    localStorage.removeItem('mCloudAdmin');
+    document.getElementById('adminNavBtn').innerText = "Admin Terminal";
+    document.getElementById('adminNavBtn').classList.remove('text-indigo-400', 'border-indigo-500/50');
+    goHome();
+};
+
+/* --- Data Ops (mock-first; Firebase if available) --- */
+const addChapter = async (chapter) => {
+    if (firebaseAvailable && firestore) {
+        // Placeholder: implement Firestore add if desired
+    }
+    state.chapters.push(chapter);
+    saveMock();
+};
+
+const updateChapter = async (id, patch) => {
+    const idx = state.chapters.findIndex(c => c.id === id);
+    if (idx !== -1) {
+        state.chapters[idx] = { ...state.chapters[idx], ...patch };
+        saveMock();
+    }
+};
+
+const deleteNews = async (id) => {
+    state.news = state.news.filter(n => n.id !== id);
+    saveMock();
+    render();
+};
+window.deleteNews = deleteNews;
+
+const broadcastNews = async () => {
+    const title = (document.getElementById('news-title')?.value || '').trim();
+    const content = (document.getElementById('news-content')?.value || '').trim();
+    if (!title || !content) { alert('Headline and content required.'); return; }
+    const item = { id: 'news-' + Date.now(), title, content, timestamp: Date.now() };
+    state.news.unshift(item);
+    saveMock();
+    document.getElementById('news-title').value = '';
+    document.getElementById('news-content').value = '';
+    alert('Broadcast transmitted.');
+    render();
+};
+window.broadcastNews = broadcastNews;
+
+/* --- Commit Manga (create / update) --- */
+window.commitManga = async () => {
+    const num = Number(document.getElementById('ch-num')?.value || 0);
+    const title = (document.getElementById('ch-title')?.value || '').trim();
+    const filter = document.getElementById('ch-filter')?.value || 'filter-raw';
+    const aura = document.getElementById('ch-aura')?.value || 'aura-none';
+    const coverInput = document.getElementById('file-cover');
+    const pagesInput = document.getElementById('file-pages');
+
+    if (!num || !title) { alert('Chapter number and title are required.'); return; }
+
+    const existing = state.editingId ? state.chapters.find(c => c.id === state.editingId) : null;
+
+    let cover = existing?.cover || '';
+    let pages = existing?.pages ? [...existing.pages] : [];
+
+    if (coverInput?.files?.length) {
+        cover = URL.createObjectURL(coverInput.files[0]);
+    }
+    if (pagesInput?.files?.length) {
+        pages = Array.from(pagesInput.files).map(f => URL.createObjectURL(f));
+    }
+
+    if (!cover && pages.length) cover = pages[0];
+
+    if (state.editingId && existing) {
+        await updateChapter(existing.id, { number: num, title, filter, aura, cover, pages });
+        alert('Entry updated.');
+    } else {
+        const id = 'ch-' + Date.now();
+        await addChapter({ id, number: num, title, filter, aura, cover, pages });
+        alert('Entry committed.');
+    }
+
+    state.editingId = null;
+    // reset inputs
+    ['ch-num','ch-title'].forEach(id => { const el = document.getElementById(id); if (el) el.value=''; });
+    ['file-cover','file-pages'].forEach(id => { const el = document.getElementById(id); if (el) el.value=''; });
+    ['lbl-cover','lbl-pages'].forEach(id => { const el = document.getElementById(id); if (el) { el.innerText = el.dataset.default || el.innerText; el.classList.remove('text-indigo-400'); } });
+    render();
+};
+
+/* --- View Manga --- */
+window.viewManga = (id) => {
+    state.viewingId = id;
+    state.currentView = 'reader';
+    render();
+};
+
+/* --- Render --- */
+const render = () => {
+    const vp = document.getElementById('view-port');
+    if (!vp) return;
+
+    const chaptersSorted = [...state.chapters].sort((a,b) => (b.number||0) - (a.number||0));
+    const newsSorted = [...state.news].sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
+
+    if (state.currentView === 'home') {
+        vp.innerHTML = `
+            <section class="max-w-[1600px] mx-auto px-6 py-12">
+                <div class="flex flex-col lg:flex-row justify-between items-end mb-20 gap-8">
+                    <div>
+                        <h1 class="text-6xl md:text-8xl font-black serif italic tracking-tighter mb-4 leading-none">Global <span class="text-indigo-500">Archive.</span></h1>
+                        <p class="text-slate-500 font-bold text-xs uppercase tracking-[0.4em]">Decentralized Creative Distribution</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+                    ${chaptersSorted.map(ch => `
+                        <div class="manga-card group cursor-pointer bg-white/5 rounded-[2.5rem] p-4" onclick="viewManga('${ch.id}')">
+                            <div class="aspect-[3/4.5] rounded-3xl overflow-hidden relative mb-4">
+                                <img src="${ch.cover || (ch.pages && ch.pages[0]) || ''}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[2s]">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90"></div>
+                                <div class="absolute bottom-6 left-6 right-6">
+                                    <span class="bg-indigo-600 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest mb-3 inline-block">Ch. ${ch.number}</span>
+                                    <h3 class="text-xl font-black italic leading-tight uppercase line-clamp-2">${ch.title}</h3>
+                                </div>
+                            </div>
+                            ${state.isAdmin ? `<div class="flex justify-end">
+                                <button onclick="event.stopPropagation(); startEdit('${ch.id}')" class="text-[10px] font-bold uppercase text-indigo-300 hover:text-indigo-100">Edit</button>
+                            </div>` : ''}
+                        </div>
+                    `).join('') || '<div class="col-span-full text-center py-20 text-slate-700 font-bold text-xs uppercase">No active sequences.</div>'}
+                </div>
+            </section>
+        `;
+    } else if (state.currentView === 'news') {
+        vp.innerHTML = `
+            <div class="max-w-4xl mx-auto px-6 py-20">
+                <h1 class="text-5xl font-black serif italic mb-16 text-center">Broadcast Feed</h1>
+                <div class="space-y-12">
+                    ${newsSorted.map(n => `
+                        <div class="p-10 bg-white/5 rounded-[48px] border-l-4 border-indigo-500">
+                            <div class="flex justify-between items-start mb-6">
+                                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">${new Date(n.timestamp).toLocaleString()}</span>
+                                ${state.isAdmin ? `<button onclick="deleteNews('${n.id}')" class="text-red-500 text-[10px] font-bold uppercase tracking-widest">Delete</button>` : ''}
+                            </div>
+                            <h2 class="text-3xl font-black italic uppercase mb-4">${n.title}</h2>
+                            <p class="text-slate-300 leading-relaxed whitespace-pre-wrap">${n.content}</p>
+                        </div>
+                    `).join('') || '<p class="text-center text-slate-600 font-bold uppercase">No broadcasts found.</p>'}
+                </div>
+            </div>
+        `;
+    } else if (state.currentView === 'admin') {
+        vp.innerHTML = `
+            <div class="max-w-[1600px] mx-auto px-6 py-12">
+                <div class="flex justify-between items-center mb-16">
+                    <h1 class="text-4xl font-black italic uppercase tracking-tighter">Root <span class="text-indigo-500">Terminal</span></h1>
+                    <button onclick="logout()" class="text-red-500 border border-red-500/20 px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest">Logout</button>
+                </div>
+                <div class="grid grid-cols-1 xl:grid-cols-12 gap-12">
+                    <div class="xl:col-span-8 space-y-12">
+                        <div class="p-10 bg-white/5 border border-white/10 rounded-[48px]">
+                            <h2 class="text-xl font-black italic uppercase mb-10">${state.editingId ? 'Edit Entry' : 'Upload Entry'}</h2>
+                            <div class="grid grid-cols-2 gap-8 mb-8">
+                                <input id="ch-num" type="number" placeholder="Ch #" class="bg-black/40 border border-white/10 p-5 rounded-2xl font-black outline-none focus:border-indigo-500">
+                                <input id="ch-title" type="text" placeholder="Title" class="bg-black/40 border border-white/10 p-5 rounded-2xl font-bold outline-none focus:border-indigo-500">
+                            </div>
+                            <div class="grid grid-cols-2 gap-8 mb-12">
+                                <select id="ch-filter" class="
